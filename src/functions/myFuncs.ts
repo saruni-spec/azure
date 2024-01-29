@@ -12,18 +12,25 @@ export async function myFuncs(
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
 
-  const consumerKey: string = "axioOaWgT8LBwX4ZjfzmG7yEsIpX7N1h";
-  const consumerSecret: string = "V5CTiNxJi4xo6hcP";
-  const url: string =
-    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
-
   const auth =
-    "Basic " +
-    Buffer.from(consumerKey + ":" + consumerSecret).toString("base64");
+    "Bearer cFJZcjZ6anEwaThMMXp6d1FETUxwWkIzeVBDa2hNc2M6UmYyMkJmWm9nMHFRR2xWOQ==";
 
   try {
-    const response = await axios.get(url, { headers: { Authorization: auth } });
-    return { body: response.data };
+    const response = await fetch(
+      "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+      {
+        headers: {
+          Authorization: auth,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { body: data };
   } catch (error) {
     if (error instanceof Error) {
       context.log(`Error calling M-Pesa API: ${error.message}`);
