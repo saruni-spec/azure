@@ -4,7 +4,6 @@ import {
   HttpResponseInit,
   InvocationContext,
 } from "@azure/functions";
-import axios from "axios";
 
 export async function myFuncs(
   request: HttpRequest,
@@ -12,25 +11,21 @@ export async function myFuncs(
 ): Promise<HttpResponseInit> {
   context.log(`Http function processed request for url "${request.url}"`);
 
-  const auth =
-    "Bearer cFJZcjZ6anEwaThMMXp6d1FETUxwWkIzeVBDa2hNc2M6UmYyMkJmWm9nMHFRR2xWOQ==";
-
   try {
-    const response = await fetch(
+    let headers = new Headers();
+
+    let consumerKey = "72hMwYgR2aeyjF71A3Ku7WVMAWVlCpWNsHzdGNvQf0Uju4Av";
+    let consumerSecret =
+      "GxVqOJByEfYxXNEDNJakqdA5XX6LgADfaMpPOTNZxjwxRKA4xbTTsZb5iZmAS736";
+    let credentials = btoa(consumerKey + ":" + consumerSecret);
+    headers.append("Authorization", "Basic " + credentials);
+    return fetch(
       "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
-      {
-        headers: {
-          Authorization: auth,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return { body: data };
+      { headers }
+    )
+      .then((response) => response.text())
+      .then((result) => ({ body: result }))
+      .catch((error) => ({ body: error }));
   } catch (error) {
     if (error instanceof Error) {
       context.log(`Error calling M-Pesa API: ${error.message}`);
